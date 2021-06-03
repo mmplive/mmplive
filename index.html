@@ -168,7 +168,7 @@
             // var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=syy,lyb"; // requires CORS addin/extension to allow data to download
 
             //build the url with symbols from the array [stocks]
-            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY," + stocks;
+            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY, ^DJI" + stocks;
             console.log(url)
 
             //var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + stocks;
@@ -217,7 +217,7 @@
                     table = document.createElement("table"),
                     row = table.insertRow();
 
-                for (var i = 0; i < stocks.length + 1; i++) {  // +1 to account for the added SPY in the stock list
+                for (var i = 0; i < stocks.length + 2; i++) {  // +2 to account for the added SPY and ^DJI in the stock list
                     var key1 = i.toString()
 
                     symbol = json["quoteResponse"]["result"][key1]["symbol"];
