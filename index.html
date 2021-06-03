@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<!--some code from: https://ssaurel.medium.com/create-a-bitcoin-price-index-watcher-in-html5-f441b1e05cd1
+    note: This program requires the CORS UNBLOCK addin to override the CORS request from finance.yahoo.com when retrieving the data.
+    -->
+<html>
+<head>
+    <title>2-StockPriceJS.html</title>
+    <style type="text/css">
+        #data, #data3, #data4  {
+            width: 750px;
+            border: 1px dashed black;
+            font-family: "Tahoma", sans-serif;
+            font-size: 12px;
+            text-align: center;
+            margin: 0 auto;
+            margin-top: 50px;
+            padding: 10px;
+        }
+
+        #data2-holder {
+            width: 750px;
+            border: 1px dashed black;
+            font-family: "Tahoma", sans-serif;
+            font-size: 12px;
+            text-align: center;
+            margin: 0 auto;
+            margin-top: 50px;
+            padding: 10px;
+        }
+
+        #data2-1, #data2 {
+            width: 730px;
+            font-family: "Tahoma", sans-serif;
+            font-size: 12px;
+            text-align: center;
+            margin: 0 auto;
+            margin-top: 5px;
+            padding: 10px;
+        }
+
+         html, body {
+            font-family: arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: auto; 
+            margin-right: auto;
+            text-align: right;
+            border: 1px solid darkred;
+            background-color: lightgoldenrodyellow;
+
+        }
+
+            table tr td {
+                border: 1px solid #ccc;
+                padding: 3px;
+                height: 12px;
+            padding-left:  10px;
+            padding-right: 6px;                
+                font-weight: bold;
+            }
+ /*center text in first row and first column*/
+        table tr:nth-child(1) td { text-align: center; font-weight: 100; } 
+        table tr td:first-child { text-align: center; }
+
+        tr:first-child, td:first-child {
+            font-weight: bold
+            font-size: 14px;
+        }
+
+            table tr:nth-child(odd) {
+                background: #f4f4f4;
+            }
+
+        input.left {float:  left}
+
+
+    </style>
+    
+</head>
+<body onload="doAll()">
+
+
+    <div id="data"></div>
+    <div id="data2-holder">    
+    <div id="data2"></div>
+    <div id = "data2-1"></div>
+    </div>
+    <div id="data4">Some info eventually goes here</div>
+    <div id="data3">
+   <!--      <button onclick="getinfo()">Update</button> -->
+        <input type="text" id="stockInput" value="SYY" style="width: 400px;">
+        <button type="button" onclick="getinfo();">Use this list</button>
+    </div>
+
+    <script type="text/javascript">
+        /*var obj_csv = {
+            size: 0,
+            dataFile: []
+        };*/
+
+        //var stocks = ["SYY", "LYB", "IBM", "MSFT", "AAPL", "BTC-USD"]; // this list appears when page first opens
+        var stocks = getCookie('stockslist');
+        var el = document.getElementById('stockInput');
+        el.defaultValue=stocks
+        console.log("cookie at start of script: " + stocks)
+        console.log("element for stockInput "+el)
+        
+
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires // + "; path=/";
+           // console.log(name + "=" + (value || "") + expires);
+        }
+
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
+
+
+
+        function getinfo() {
+            stocks = document.getElementById("stockInput").value.toUpperCase(); //read input
+            stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
+            stocks = stocks.split(',');//create Array stocksTemp
+            stocks.sort();
+            setCookie('stockslist', stocks, 1000);
+            //document.getElementById("stockInput").value.innerHTML = stocks;
+            var el = document.getElementsByTagName('stockInput');
+            el.defaultValue=stocks; 
+
+            doAll();
+
+
+            var elem = document.getElementById("stockInput")//refresh div data3 with the input box
+            elem.value = stocks;
+        };
+
+        function doAll() {
+            var stocks = getCookie('stockslist');
+            stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
+            stocks = stocks.split(',');//create Array stocksTemp
+            stocks.sort();
+            //document.getElementById("stockInput").innerHTML = stocks;
+            //setCookie('stockslist', stocks, 1000);
+            console.log("stocks list in DoAll:" + stocks)
+            var xmlhttp = new XMLHttpRequest();
+            //var url = "https://api.coindesk.com/v1/bpi/currentprice.json";
+            //var url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
+            // var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=syy,lyb"; // requires CORS addin/extension to allow data to download
+
+            //build the url with symbols from the array [stocks]
+            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY," + stocks;
+            console.log(url)
+
+            //var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + stocks;
+
+            // use this site to view json files: https://jsonformatter.org/json-viewer
+
+            xmlhttp.onreadystatechange = function () {    // Call a function when the state changes.
+
+                if (this.readyState == 4 && this.status == 200) {
+
+                    var json = JSON.parse(this.responseText);
+                    parseJson(json);
+                }
+            }
+
+            xmlhttp.open("GET", url, true);
+
+            xmlhttp.send();
+
+            //Add "Update" button below the table
+            function addButton1() {
+                let btn = document.createElement("button");
+                btn.innerHTML = "Update";
+                btn.className = 'input.left';
+                btn.onclick = function () {
+                    getinfo();
+                };
+                var data2div = document.getElementById("data2-1");
+                //data2div.appendChild(btn);
+                data2div.innerHTML = " ";
+                data2div.appendChild(btn);
+            }
+
+
+            function parseJson(json) {
+                console.log(json)
+                var quoteTime = json["quoteResponse"]["result"]["0"]["regularMarketTime"];
+                quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
+
+                document.getElementById("data").innerHTML = "Updated: " +quoteTime;
+
+                //build the data array data1[] starting with the header row:
+
+                var data1 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap"];
+                var perrow = data1.length, //initial length is how many columsn the table will have; note that data1.length is used again below but data1 is expanded via pushes.
+                    table = document.createElement("table"),
+                    row = table.insertRow();
+
+                for (var i = 0; i < stocks.length + 1; i++) {  // +1 to account for the added SPY in the stock list
+                    var key1 = i.toString()
+
+                    symbol = json["quoteResponse"]["result"][key1]["symbol"];
+                    last = json["quoteResponse"]["result"][key1]["regularMarketPrice"].toFixed(2);
+                    close = json["quoteResponse"]["result"][key1]["regularMarketPreviousClose"].toFixed(2);
+                    open = json["quoteResponse"]["result"][key1]["regularMarketOpen"].toFixed(2);
+                    daylow = json["quoteResponse"]["result"][key1]["regularMarketDayLow"].toFixed(2);
+                    dayhigh = json["quoteResponse"]["result"][key1]["regularMarketDayHigh"].toFixed(2);
+                    high52 = json["quoteResponse"]["result"][key1]["fiftyTwoWeekHigh"].toFixed(2);
+                    low52 = json["quoteResponse"]["result"][key1]["fiftyTwoWeekLow"].toFixed(2);
+                    daypercent = json["quoteResponse"]["result"][key1]["regularMarketChangePercent"].toFixed(2);
+                    volume = (json["quoteResponse"]["result"][key1]["regularMarketVolume"]/1000000).toFixed(2);
+                    ma50= json["quoteResponse"]["result"][key1]["fiftyDayAverage"].toFixed(2);
+                    ma200= json["quoteResponse"]["result"][key1]["twoHundredDayAverage"].toFixed(2);
+
+                    // put + in front of numbers that are positive.
+                    chg2 = (last-close).toFixed(2);
+                    var chg = (chg2 > 0 ) ? "+" + chg2 : "" + chg2;
+
+                    gap2=(open-close).toFixed(2);
+                    var gap = (gap2 > 0 ) ? "+" + gap2 : "" + gap2;
+
+                    data1.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap)
+
+                }
+
+                // LOOP THROUGH ARRAY AND ADD TABLE CELLS
+                for (var i = 0; i < data1.length; i++) {
+                    var cell = row.insertCell();
+                    cell.innerHTML = data1[i];
+
+                    // ATTACH A RUNNING NUMBER OR CUSTOM DATA
+                    // cell.dataset.id = i;
+
+                    /* ATTACH ONCLICK LISTENER IF REQUIRED
+                    cell.addEventListener("click", function(){
+                      console.log(this.dataset.id);
+                    });
+                    */
+
+                    // BREAK INTO NEXT ROW
+                    var next = i + 1;
+                    if (next % perrow == 0 && next != data1.length) {
+                        row = table.insertRow();
+                    }
+                }
+
+                // (C) ATTACH TABLE TO CONTAINER
+                document.getElementById("data2").innerHTML = "";
+                document.getElementById("data2").appendChild(table);
+
+               //const output = document.getElementById('cookies')
+                //var xCookie = '> ' + document.cookie
+                //document.getElementById("data4").innerHTML = "YES" + xCookie;
+
+                formatBackground_table0();
+                addButton1();
+
+            }
+
+
+            // found at http://jsfiddle.net/ardeezstyle/GSWBW/1/
+            var formatBackground_table0 = function () {
+                var table2, tbody, rowCount, cellCount, value;
+                table2 = document.getElementsByTagName('table')[0];
+                rowCount = document.getElementById('data2').getElementsByTagName('tr').length
+                //console.log("rows = "+ document.getElementById('data2').getElementsByTagName('tr').length)
+                //console.log("Table2: "+typeof table2)
+                // if (table2.childNodes[0]) tbody = table2.childNodes[0];
+                //console.log("childnodes[0]"+ table2.childNodes[0])
+                tbody = table2.childNodes[0];
+                // console.log("Tbody: " + tbody)
+                //  console.log("tbody.childNodes.length: " + tbody.childNodes.length)
+                //console.log("childnode2")
+                if (tbody) rowCount = tbody.childNodes.length;
+                //  console.log("rowcount "+ rowCount)
+                for (i = 1; i < rowCount; i++) {
+                    cellCount = tbody.childNodes[i].childNodes.length;
+                    // console.log("Cellcount: "+cellCount)
+                    for (j = 1; j < cellCount; j++) {
+
+                        value = tbody.childNodes[i].childNodes[j].outerText;
+                        //  console.log(j,i,value)
+                        if (value.substring(0, 1) == "-") {
+                            //tbody.childNodes[i].childNodes[j].style.backgroundColor = "lightcoral";
+                            tbody.childNodes[i].childNodes[j].style.color = "red";
+                            tbody.childNodes[i].childNodes[(0)].style.color = "red";
+
+                         } 
+                         if (tbody.childNodes[i].childNodes[(2)].outerText.substring(0,1) !== "-") {
+                            tbody.childNodes[i].childNodes[(0)].style.color = "limegreen"
+                         }
+                        
+                        //if (value.substring(0, 1) == "-") tbody.childNodes[i].childNodes[j].style.fontcolor("sandybrown");
+                        //if(value.substring(0, 1) == "-") window.document.getElementById("color").style.color = "red";
+
+                        //j += 1;
+                    }
+                    //i += 1;
+                }
+            };
+        };
+
+        function readImage(input) {
+
+            // console.log("Input" + input + input.files + input.files[0])
+            if (input.files && input.files[0]) {
+                // console.log("good file load")
+                let reader = new FileReader();
+                reader.readAsBinaryString(input.files[0]);
+                reader.onload = function (e) {
+                    // console.log(e);
+                    obj_csv.size = e.total;
+                    obj_csv.dataFile = e.target.result
+                    //console.log("obj_csv.dataFile" + obj_csv.dataFile)
+                    parseData(obj_csv.dataFile)
+                    //console.log(obj_csv)
+                }
+            }
+            console.log("obj_csv info:")
+            console.log(obj_csv)
+            console.log(typeof obj_csv)
+        }
+
+        function parseData(data) {
+            let csvData = [];
+            let lbreak = data.split("\n");
+            lbreak.forEach(res => {
+                csvData.push(res.split(","));
+            });
+        }
+
+
+    </script>
+</body>
+</html>
