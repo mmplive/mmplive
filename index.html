@@ -20,7 +20,8 @@
         #data2-holder { width: 850px; border: none; }
 
         html, body {
-            font-family: arial, sans-serif;
+            font-family: "Tahoma", sans-serif;
+            font-size: 12px;
         }
 
         table {
@@ -71,7 +72,7 @@
     <div id="data4">Some info goes here</div>
     <div id="data3">
    
-        <input type="text" id="stockInput" value="SYY" style="width: 400px;">
+        <input type="text" id="stockInput" value="SYY" style="width: 500px;">
         <button type="button"  onclick="useList();">Use this list</button>
              
         <input type="checkbox" id="showBit" onClick="bitcoinprice()" /> Show Bitcoin
@@ -80,11 +81,12 @@
     <script type="text/javascript">
 
         function start() {
-
         var stocks = getCookie('stockslist');
         var el = document.getElementById('stockInput');
         el.defaultValue=stocks
         stockPrice()
+        bitcoinprice();
+
 
         }
 
@@ -125,6 +127,7 @@
             stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
             stocks = stocks.split(',');//create Array stocks
             stocks.sort();
+            window.stocks=stocks;
             setCookie('stockslist', stocks, 1000);
 
             //var el = document.getElementsByTagName('stockInput');
@@ -140,10 +143,13 @@
 
         function bitcoinprice() {   //get btc.usd price
             let inputs = document.getElementById('showBit');
-            
-            if inputs.checked == false {
+           
+            //if (document.querySelector('.showBit').checked) {
+            if (inputs.checked == false) {
                 document.getElementById("databit").style.display = "none";
                 return;
+            } else {
+                document.getElementById("databit").style.display = "block";
             }
 
 
@@ -167,7 +173,7 @@
                 var quoteTime = json["time"]["updated"];
                 quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
 
-                document.getElementById("databit").innerHTML+= ("Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]);//.toFixed(2);
+                document.getElementById("databit").innerHTML= "Updated: " +quoteTime+ " USD $" + (json["bpi"]["USD"]["rate"]).toFixed(2);
                 //document.getElementById("databit").innerHTML = "Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]//.toFixed(2);
         } 
 
@@ -176,6 +182,7 @@
             stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
             stocks = stocks.split(',');//create Array stocksTemp
             stocks.sort();
+            window.stocks=stocks; // make stocks a global variable for other functions to use.
             //document.getElementById("stockInput").innerHTML = stocks;
             //setCookie('stockslist', stocks, 1000);
             //console.log("stocks list in DoAll:" + stocks)
@@ -214,7 +221,7 @@
                 btn.innerHTML = "Update";
                // btn.className = 'input.left';
                 btn.onclick = function () {
-                    getinfo();
+                    start();
                 };
                 var data2div = document.getElementById("data2-1");
                 //data2div.appendChild(btn);
@@ -228,9 +235,9 @@
                 btn2.onclick = function () {
                     bitcoinprice();
                 };
-                var databit = document.getElementById("databit");
+                var databit = document.getElementById("data2-1");
                 
-                databit.innerHTML = " ";
+                //databit.innerHTML = " ";
                 databit.appendChild(btn2);
             }
 
@@ -239,8 +246,8 @@
                 //console.log(json)
                 var quoteTime = json["time"]["updated"];
                 quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
-
-                document.getElementById("databit").innerHTML+= ("Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]);//.toFixed(2);
+                bitprice = json["bpi"]["USD"]["rate"]
+                document.getElementById("databit").innerHTML= "<b> Bitcoin: "+ bitprice + "</b>  @ " + quoteTime;
                 //document.getElementById("databit").innerHTML = "Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]//.toFixed(2);
             }    
 
@@ -339,7 +346,7 @@
  
                 }
             };
-        };
+        //};
 
         /*function readImage(input) {
 
