@@ -6,18 +6,92 @@
 <head>
     <title>2-StockPriceJS.html</title>
     <style type="text/css">
-        #data, #data3, #data4,#data2-holder,#data2-1, #data2, #databit  {
-            width: 830px;
-            border: 1px dashed black;
+        #data, #data3, #data4,#data2-holder, #data2, #databit, #data2-1,#datawatch  {
+            width: 840px;
+            border: 1px solid lightgrey;
             font-family: "Tahoma", sans-serif;
             font-size: 12px;
             text-align: center;
-            margin: 0 auto;
-            margin-top: 20px;
+            margin: 10 left;
+            margin-top: 10px;
             padding: 10px;
+            padding-top: 20px;
+            position:  relative;
         }
 
-        #data2-holder { width: 850px; border: none; }
+        #data {
+            border:  none;
+
+        }
+        #data3 {
+            text-align: left;
+        }
+        .uselist { 
+            color: green; 
+            margin-top: 0px;
+            position: absolute;
+            left:  610px;
+
+        }
+        .showBit {
+            position:  relative;
+            
+         }
+                
+        .darkmode {
+            position:  relative;
+            
+
+
+        }
+        .inputs {
+            position:  absolute;
+            left:  80px;
+            
+        }
+        
+        #data2-holder { 
+            width: 820px; 
+            border: none; 
+        }
+
+        #refresh1 {
+            border:  none;
+            background-color: green;
+            font-family:  "Arial Black", sans-serif;
+            color: white;
+            padding-left: 3px;
+            padding-right: 3px;
+            position: absolute;
+
+        }
+        
+
+        #divtitle1,#divtitle2,#divtitle3,#divtitle4,#divtitle5 {
+            
+            border:  none;
+            background-color: darkslateblue;
+            font-family:  "Arial Black", sans-serif;
+            color: white;
+            padding-left: 3px;
+            padding-right: 3px;
+            position: absolute;
+        }
+        .dark-mode-body {
+            background-color: black;
+            color:  white;
+
+        }
+
+        .dark-mode-table {
+            background-color: black;
+            color: whitesmoke;
+        }        
+        .dark-mode-rows {
+            background-color: black;
+            color: whitesmoke;
+        }        
+
 
         html, body {
             font-family: "Tahoma", sans-serif;
@@ -30,17 +104,19 @@
             margin-right: auto;
             text-align: right;
             background-color: lightgoldenrodyellow;
+            padding-bottom: 15px;
+            width:  100%;
 
         }
 
-            table tr td {
+        table tr td {
                 border: 1px solid #ccc;
                 padding: 3px;
                 height: 12px;
                 padding-left:  10px;
                 padding-right: 6px;                
                 font-weight: bold;
-            }
+        }
         /*center text in first row and first column*/
         table tr:nth-child(1) td { text-align: center; font-weight: 100; } 
         table tr td:first-child { text-align: center; }
@@ -50,9 +126,9 @@
             font-size: 14px;
         }
 
-            table tr:nth-child(odd) {
-                background: #f4f4f4;
-            }
+        table tr:nth-child(odd) {
+            background: #f4f4f4;
+        }
 
         input.left {float:  left}
 
@@ -62,36 +138,112 @@
 </head>
 <body onload="start()">
 
-
+    
     <div id="data"></div>
-    <div id="data2-holder">    
-        <div id="data2">This program requires a CORS UNBLOCK addin to override the CORS request from finance.yahoo.com to this URL when retrieving the data.</div>
+    <!-- <div id="data2-holder">     -->
+        <div id="data2"></div>
         <div id="databit"></div>
+        <div id="datawatch"></div>
         <div id="data2-1"></div>
-    </div>
-    <div id="data4">Some info goes here</div>
+    <!-- </div> -->
+    <div id="data4">Some research goes here</div>
     <div id="data3">
-   
-        <input type="text" id="stockInput" value="SYY" style="width: 500px;">
-        <button type="button"  onclick="useList();">Use this list</button>
-             
-        <input type="checkbox" id="showBit" onClick="bitcoinprice()" /> Show Bitcoin
+        Stock List
+        <input type="text" class = "inputs" id="stockInput" value="SYY" style="width: 500px; font-weight: bold;"> 
+        <button type="button" class="uselist" onclick="useList();">Use these lists</button>
+        <br><br>
+        Daily Watch 
+        <input type="text" class = "inputs" id="watchlist" value=" " style="width: 500px; font-weight: bold;">
+        <br>
+        <br>
+        <input type="checkbox" class="showBit" id="showBit" onClick="bitcoinprice()">
+        <label for="showBit" style ="left: 600px; font-weight: bold;"> Show currencies</label>  
+        <br>
+        <input type="checkbox" class="darkmode" id="darkmode" onClick="darkmode()" >  
+        
+        <label for="darkmode"style ="left: 600px; font-weight: bold;">Darkish mode</label>
     </div>
+    <div id="divtitle1">divtitle1</div>
+    <div id="divtitle2">divtitle2</div>
+    <div id="divtitle3">divtitle3</div>
+    <div id="divtitle4">divtitle4</div>
+    <div id="divtitle5">divtitle5</div>
+    <div id="refresh1">refresh</div>
 
     <script type="text/javascript">
 
-        function start() {
-        var stocks = getCookie('stockslist');
-        var el = document.getElementById('stockInput');
-        el.defaultValue=stocks
-        stockPrice()
-        bitcoinprice();
+        document.getElementsByTagName("BODY")[0].onresize = function() {divTitles2()}; 
+        document.getElementById("databit").onresize = function() {divTitles2()}; 
+        document.getElementById("refresh1").setAttribute('onclick','start();');
+        document.getElementById("refresh1").style.cursor="default"; 
+        
+        function darkmode() {
+            let darkmodeOn = document.getElementById('darkmode');
+            window.darkmodeOn = darkmode.checked;
+           
+        
+            var element = document.body;
+            element.classList.toggle("dark-mode-body");
+            
+            //var element = document.getElementsByTagName('table')[0];
+            //element.classList.toggle("dark-mode-table");
+            if (darkmode.checked == true) {    
+                for(tables=0;tables<3;tables++)  {
+                    var els = document.getElementsByTagName("table")[tables].getElementsByTagName("td");
+                    for(var i=0;i<els.length;i++)  {
+                        els[i].style.background = "black"
+                        if (els[i].style.color == "black") {
+                            els[i].style.color = "white"
+                        }
+                    }
+                }
+            }
 
+        function start() {
+            //console.log(data2.getBoundingClientRect());
+ 
+            var stocks = getCookie('stockslist');
+            var watchlist = getCookie('watchlist');
+            var el = document.getElementById('stockInput');
+            var el2 = document.getElementById('watchlist');
+            el2.defaultValue=watchlist;
+            el.defaultValue=stocks;
+
+            stockPrice()
+            bitcoinprice();
+            divTitles2();
+            darkmode();
+           
+            
 
         }
+         
+        function divTitles2() {
+            divTitleFunc("data2","divtitle1","Stock list as of "+ window.quoteTime,0);
+            divTitleFunc("datawatch","divtitle4","Daily Watch",0);
+            divTitleFunc("data3","divtitle3","Settings",0);
+            divTitleFunc("databit","divtitle2","Currency",0);
+            divTitleFunc("data4","divtitle5","Research",0);
+            divTitleFunc("data2", "refresh1", "&#x21bb Refresh",290)
+            
+            //document.location.reload(true);
+        };
 
-
+        
+        
+            // function(div to get title, title div name, title text)
+        function divTitleFunc(gettitle,titlediv,ttext, moreOffset) {
+                offsets = document.getElementById(gettitle).getBoundingClientRect();
+                divTitles = document.getElementById(titlediv);
                 
+                data2top  = (offsets.top-7) + "px";
+                data2left = (offsets.left+10+moreOffset)+ "px";
+                divTitles.style.left = data2left;
+                divTitles.style.top = data2top;
+                divTitles.innerHTML = ttext;
+            //console.log("divtitle1: ",typeof("data2top"), data2left,data2top)
+        }
+
         // cookie contains stock list sorted 
         function setCookie(name, value, days) {
             var expires = "";
@@ -101,7 +253,7 @@
                 expires = "; expires=" + date.toUTCString();
             }
             document.cookie = name + "=" + (value || "") + expires // + "; path=/";
-           // console.log(name + "=" + (value || "") + expires);
+           console.log("Cookie"  + name + "=" + (value || "") + expires);
         }
 
         function getCookie(name) {
@@ -127,8 +279,16 @@
             stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
             stocks = stocks.split(',');//create Array stocks
             stocks.sort();
+
+            watch = document.getElementById("watchlist").value.toUpperCase(); //read input
+            watch = watch.replace(/\s+/g, ''); // get rid of spaces
+            watch = watch.split(',');//create Array stocks
+            watch.sort();
+
             window.stocks=stocks;
+            window.watchlist = watch;
             setCookie('stockslist', stocks, 1000);
+            setCookie('watchlist', watch,1000);
 
             //var el = document.getElementsByTagName('stockInput');
             //el.defaultValue=stocks; 
@@ -139,39 +299,52 @@
             var elem = document.getElementById("stockInput")//refresh div data3 with the input box
             elem.value = stocks;
 
+            var elem2 = document.getElementById("watchlist")//refresh div data3 with the input box
+            elem2.value = watch;
+
+
         };
 
         function bitcoinprice() {   //get btc.usd price
-            let inputs = document.getElementById('showBit');
+            let bitbox = document.getElementById('showBit');
+            window.bitbox = bitbox.checked;
            
             //if (document.querySelector('.showBit').checked) {
-            if (inputs.checked == false) {
+            if (bitbox.checked == false) {
                 document.getElementById("databit").style.display = "none";
-                return;
+                document.getElementById("divtitle2").style.display = "none";
+            
             } else {
-                document.getElementById("databit").style.display = "block";
+                document.getElementById("divtitle2").style.display = "block"; 
+                document.getElementById("databit").style.display = "block";   
+                return;
+                            
             }
+        
+            divTitles2();
+            
+           
 
+                // var xmlhttp = new XMLHttpRequest();
+                // var url = "https://api.coindesk.com/v1/bpi/currentprice.json";
+                // xmlhttp.onreadystatechange = function () {    // Call a function when the state changes.
 
-            var xmlhttp = new XMLHttpRequest();
-            var url = "https://api.coindesk.com/v1/bpi/currentprice.json";
-            xmlhttp.onreadystatechange = function () {    // Call a function when the state changes.
+                //     if (this.readyState == 4 && this.status == 200) {
 
-                if (this.readyState == 4 && this.status == 200) {
-
-                    var json = JSON.parse(this.responseText);
-                    parseBitJson(json);
-                }
-            }
-            xmlhttp.open("GET", url, true);
-            xmlhttp.send();
+                //         var json = JSON.parse(this.responseText);
+                //         parseBitJson(json);
+                //     }
+                // }
+                // xmlhttp.open("GET", url, true);
+                // xmlhttp.send();
 
         }
 
         function parseBitJson(json) {
                 //console.log(json)
                 var quoteTime = json["time"]["updated"];
-                quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
+                //quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
+                //window.quoteTime = quoteTime;
 
                 document.getElementById("databit").innerHTML= "Updated: " +quoteTime+ " USD $" + (json["bpi"]["USD"]["rate"]).toFixed(2);
                 //document.getElementById("databit").innerHTML = "Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]//.toFixed(2);
@@ -183,6 +356,13 @@
             stocks = stocks.split(',');//create Array stocksTemp
             stocks.sort();
             window.stocks=stocks; // make stocks a global variable for other functions to use.
+
+            var watch = getCookie('watchlist');
+            watch = watch.replace(/\s+/g, ''); // get rid of spaces
+            watch = watch.split(',');//create Array stocksTemp
+            watch.sort();
+            window.stocks=stocks; // make stocks a global variable for other functions to use.
+            window.watch=watch;
             //document.getElementById("stockInput").innerHTML = stocks;
             //setCookie('stockslist', stocks, 1000);
             //console.log("stocks list in DoAll:" + stocks)
@@ -192,8 +372,8 @@
             // var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=syy,lyb"; // requires CORS addin/extension to allow data to download
 
             //build the url with symbols from the array [stocks]
-            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY,^DJI," + stocks;
-            //console.log(url)
+            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY,^DJI,BTC-USD," + watch +"," + stocks;
+            //console.log("URL: " + url)
 
             //var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + stocks;
 
@@ -215,33 +395,6 @@
 
         }    
 
-            //Add "Update" button below the table
-            function addButton1() {   // add Update button below the main table
-                let btn = document.createElement("button");
-                btn.innerHTML = "Update";
-               // btn.className = 'input.left';
-                btn.onclick = function () {
-                    start();
-                };
-                var data2div = document.getElementById("data2-1");
-                //data2div.appendChild(btn);
-                data2div.innerHTML = " ";
-                data2div.appendChild(btn);
-            
-
-                let btn2 = document.createElement("button");
-                btn2.innerHTML = "Bitcoin";
-             
-                btn2.onclick = function () {
-                    bitcoinprice();
-                };
-                var databit = document.getElementById("data2-1");
-                
-                //databit.innerHTML = " ";
-                databit.appendChild(btn2);
-            }
-
-
             function parseBitJson(json) {
                 //console.log(json)
                 var quoteTime = json["time"]["updated"];
@@ -249,6 +402,7 @@
                 bitprice = json["bpi"]["USD"]["rate"]
                 document.getElementById("databit").innerHTML= "<b> Bitcoin: "+ bitprice + "</b>  @ " + quoteTime;
                 //document.getElementById("databit").innerHTML = "Updated: " +quoteTime+ " USD $" + json["bpi"]["USD"]["rate"]//.toFixed(2);
+
             }    
 
 
@@ -257,17 +411,25 @@
                 //console.log(json)
                 var quoteTime = json["quoteResponse"]["result"]["0"]["regularMarketTime"];
                 quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
+                window.quoteTime = quoteTime;
 
-                document.getElementById("data").innerHTML = "Updated: " +quoteTime;
+                //document.getElementById("data").innerHTML = "Updated: " +quoteTime;
 
                 //build the data array data1[] starting with the header row:
 
                 var data1 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap"];
+                var data2 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap"];
+                var data3 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap"];
                 var perrow = data1.length, //initial length is how many columsn the table will have; note that data1.length is used again below but data1 length is expanded via pushes.
-                    table = document.createElement("table"),
-                    row = table.insertRow();
+                    table= document.createElement("table"),
+                    tablebit= document.createElement("table"),
+                    tablewatch = document.createElement("table"),
+                    //tablebit = document.createElement("table")
+                    rowbit = tablebit.insertRow(),
+                    row = table.insertRow(),
+                    rowwatch = tablewatch.insertRow();
 
-                for (var i = 0; i < stocks.length + 2; i++) {  // +2 to stocks.lenght to account for the added SPY and ^DJI in the stock list
+                for (var i = 0; i < (watch.length + stocks.length + 3); i++) {  // +3 to stocks.lenght to account for the added SPY and ^DJI and BTC-USD in the stock list
                     var key1 = i.toString()
 
                     symbol = json["quoteResponse"]["result"][key1]["symbol"];
@@ -290,35 +452,86 @@
                     gap2=(open-close).toFixed(2);
                     var gap = (gap2 > 0 ) ? "+" + gap2 : "" + gap2;
 
-                    data1.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap)
+                    if (watch.includes(symbol)) {
+                            data3.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap);
 
-                }
-
-                // LOOP THROUGH ARRAY AND ADD TABLE CELLS
-                for (var i = 0; i < data1.length; i++) {
-                    var cell = row.insertCell();
-                    cell.innerHTML = data1[i];
-                    // BREAK INTO NEXT ROW
-                    var next = i + 1;
-                    if (next % perrow == 0 && next != data1.length) {
-                        row = table.insertRow();
+                    } else if (symbol==="BTC-USD") {
+                        chg2 = json["quoteResponse"]["result"][key1]["regularMarketChangePercent"];
+                        chg2 = parseFloat(chg2);
+                        last = parseFloat(last);
+                        chg = (last * chg2/100).toFixed(2);
+                        gap = "n/a";
+                        data2.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap);
+                        //console.log("chg2: "+chg2);
+                    } 
+                    else {
+                        data1.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap)
                     }
-                }
 
-                // (C) erase current table from data2 and append new table  
+                }   
+                    // LOOP THROUGH ARRAYS AND ADD TABLE CELLS
+                        for (var j = 0; j < data2.length; j++) {
+                            var cell = rowbit.insertCell();
+                            cell.innerHTML = data2[j];
+                            // BREAK INTO NEXT ROW
+                            var next = j + 1;
+                            if (next % perrow == 0 && next != data2.length) {
+                                rowbit = tablebit.insertRow();
+                            }
+                        }
+
+                        for (var k = 0; k < data1.length; k++) {
+                            var cell = row.insertCell();
+                            cell.innerHTML = data1[k];
+                         // BREAK INTO NEXT ROW
+                            var next = k + 1;
+                            if (next % perrow == 0 && next != data1.length) {
+                                row = table.insertRow();
+                            }
+                        }
+
+                        for (var l = 0; l < data3.length; l++) {
+                            //console.log("D3 length: "+ data3.length)
+                            var cell = rowwatch.insertCell();
+                            cell.innerHTML = data3[l];
+                         // BREAK INTO NEXT ROW
+                            var next = l + 1;
+                            if (next % perrow == 0 && next != data3.length) {
+                                rowwatch = tablewatch.insertRow();
+                            }
+                        }
+                
+                // (C) erase current table from data2 and databit  and append new table  
                 document.getElementById("data2").innerHTML = "";
+                document.getElementById("databit").innerHTML = "";
+                document.getElementById("datawatch").innerHTML = "";
                 document.getElementById("data2").appendChild(table);
+                document.getElementById("databit").appendChild(tablebit);
+                document.getElementById("datawatch").appendChild(tablewatch);
 
-                formatBackground_table0();
-                addButton1();
+                format_table(0); // stocks table
+                format_table(1); // bitcoin table
+                format_table(2); // watch table
+                
+                divTitles2();
 
             }
 
+            function research(symbol) {
+                // concept is to put historical data into a  DIV data4 and display it when the symbol on any visible table row is clicked
+                // maybe a chart
+                // need to find a data source for 1 year data
+                // for now, just show that the onclick works for each table row symbol name by updating text in DIV data4.
+                document.getElementById("data4").innerHTML = "Research for "+ symbol;
+
+
+
+            }
 
             // found at http://jsfiddle.net/ardeezstyle/GSWBW/1/
-            var formatBackground_table0 = function () {
+            function format_table(tNumber) {
                 var table2, tbody, rowCount, cellCount, value;
-                table2 = document.getElementsByTagName('table')[0];
+                table2 = document.getElementsByTagName('table')[tNumber];
                 rowCount = document.getElementById('data2').getElementsByTagName('tr').length
 
                 tbody = table2.childNodes[0];
@@ -327,6 +540,7 @@
  
                 for (i = 1; i < rowCount; i++) {
                     cellCount = tbody.childNodes[i].childNodes.length;
+
   
                     for (j = 1; j < cellCount; j++) {
 
@@ -344,6 +558,16 @@
                         
                     }
  
+                }
+                for (i=1; i<rowCount; i++){
+                    xsymbol = tbody.childNodes[i].childNodes[(0)].outerText
+                   
+                    //functionstring = 'research('+xsymbol+');'
+                    functionstring = 'research("'+xsymbol+'");'
+                    //console.log(functionstring);
+                    tbody.childNodes[i].childNodes[(0)].setAttribute('onclick',functionstring);
+                    tbody.childNodes[i].childNodes[(0)].style.cursor="default";
+                    
                 }
             };
         //};
