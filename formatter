@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<!--some code from: https://ssaurel.medium.com/create-a-bitcoin-price-index-watcher-in-html5-f441b1e05cd1
+    note: This program requires the CORS UNBLOCK addin to override the CORS request from finance.yahoo.com when retrieving the data.
+    -->
+<html>
+<head>
+    <title>2-StockPriceJS.html</title>
+    <style type="text/css">
+      #data, #data3, #data4,#data2-holder, #data2, #databit, #data2-1,#datawatch  {
+            width: 940px;
+            border: 1px solid lightgrey;
+            font-family: "Tahoma", sans-serif;
+            font-size: 12px;
+            text-align: center;
+            margin: 10 left;
+            margin-top: 10px;
+            padding: 10px;
+            padding-top: 20px;
+            position:  relative;
+        }  
+        #data3 {
+            text-align: left;
+        }
+        #divtitle1,#divtitle2,#divtitle3,#divtitle4,#divtitle5 {
+            
+            border:  none;
+            background-color: darkslateblue;
+            font-family:  "Arial Black", sans-serif;
+            color: white;
+            padding-left: 3px;
+            padding-right: 3px;
+            position: absolute;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-left: auto; 
+            margin-right: auto;
+            width:  100%;
+            
+        }
+
+        td { 
+        border: 1px solid lightgrey;
+        text-align: right;
+            padding-bottom: 15px;
+            padding: 3px;
+            height: 12px;
+            padding-left:  10px;
+            padding-right: 6px;                
+            font-weight: bold;
+        }
+
+    </style>
+    
+</head>
+
+<body> 
+
+    
+    <div id="data">Data</div>
+    <!-- <div id="data2-holder">     -->
+        <div id="data2">Data2</div>
+        <div id="databit">Databit</div>
+        <div id="datawatch">Datawatch</div>
+        <div id="data2-1">Data2-1</div>
+    <!-- </div> -->
+    <div id="data4">Data4</div>
+    <div id="data3">
+        Stock List
+        <input type="text" class = "inputs" id="stockInput" value="SYY" style="width: 500px; font-weight: bold;"> 
+        <button type="button" class="uselist" onclick="useList();">Use these lists</button>
+        <br><br>
+        Daily Watch 
+        <input type="text" class = "inputs" id="watchlist" value=" " style="width: 500px; font-weight: bold;">
+        <br>
+        <br>
+        <input type="checkbox" class="showBit" id="showBit" onClick="bitcoinprice()">
+        <label for="showBit" style ="left: 600px; font-weight: bold;"> Show currencies</label>  
+        
+        <!--<input type="checkbox" class="darkmode" id="darkmode" onClick="darkmodeChange();" >-->  
+        <button type="button" class="darkmode" id="darkmode" onClick="darkmodeClick();" >Dark Mode</button>  
+        <label for="darkmode" id="darklable" style ="left: 600px; font-weight: bold;"> Dark mode off</label> 
+
+        
+    </div>
+    <div id="divtitle1">divtitle1</div>
+    <div id="divtitle2">divtitle2</div>
+    <div id="divtitle3">divtitle3</div>
+    <div id="divtitle4">divtitle4</div>
+    <div id="divtitle5">divtitle5</div>
+    <div id="refresh1">refresh</div>
+    <p id="demo"></p>
+
+    <script type="text/javascript">
+        stockPrice();
+        format_table_data('table1');
+        format_table_data('tablebit');
+        format_table_data('tablewatch');
+        //listchildNodes();
+
+        function listchildNodes() {
+          var c = document.body.childNodes;
+          var txt = "";
+          var i;
+          for (i = 0; i < c.length; i++) {
+            txt = txt + c[i].nodeName + "<br>";
+          }
+
+          document.getElementById("demo").innerHTML = txt;
+        }
+        
+        function stockPrice() {
+//            var stocks = getCookie('stockslist');
+            var stocks = "SYY,BAC";
+            stocks = stocks.replace(/\s+/g, ''); // get rid of spaces
+            stocks = stocks.split(',');//create Array stocksTemp
+            stocks.sort();
+            window.stocks=stocks; // make stocks a global variable for other functions to use.
+
+//            var watch = getCookie('watchlist');
+            var watch = "TSLA,X";
+            watch = watch.replace(/\s+/g, ''); // get rid of spaces
+            watch = watch.split(',');//create Array stocksTemp
+            watch.sort();
+            combined=stocks.concat(watch);
+            
+            combined.sort();
+            console.log(combined);
+            window.combined = combined;
+            window.stocks=stocks; // make stocks a global variable for other functions to use.
+            window.watch=watch;
+            //document.getElementById("stockInput").innerHTML = stocks;
+            //setCookie('stockslist', stocks, 1000);
+            //console.log("stocks list in DoAll:" + stocks)
+            var xmlhttp = new XMLHttpRequest();
+            //var url = "https://api.coindesk.com/v1/bpi/currentprice.json";
+            //var url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo"
+            // var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=syy,lyb"; // requires CORS addin/extension to allow data to download
+
+            //build the url with symbols from the array [stocks]
+            var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + "SPY,^DJI,BTC-USD," + combined;
+            //console.log("URL: " + url)
+
+            //var url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + stocks;
+
+            // use this site to view json files: https://jsonformatter.org/json-viewer
+
+            xmlhttp.onreadystatechange = function () {    // Call a function when the state changes.
+
+                if (this.readyState == 4 && this.status == 200) {
+
+                    var json = JSON.parse(this.responseText);
+                    parseJson(json);
+                }
+            }
+
+            xmlhttp.open("GET", url, true);
+
+            xmlhttp.send();
+
+
+        }    //end of stockprice()
+
+
+            function parseJson(json) {
+                //console.log(json)
+                var quoteTime = json["quoteResponse"]["result"]["0"]["regularMarketTime"];
+                quoteTime = Date(quoteTime).toLocaleString('en-US').substring(0, 24);
+                window.quoteTime = quoteTime;
+                window.json = json;
+
+                //document.getElementById("data").innerHTML = "Updated: " +quoteTime;
+
+                //build the data array data1[] starting with the header row:
+
+                var data1 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap","ER"];
+                var data2 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap","ER"];
+                var data3 = ["Symbol", "Last", "Chg", "High", "Low", "Volume","52Low","52High","Day%", "MA50","MA200","Gap","ER"];
+                var perrow = data1.length, //initial length is how many columsn the table will have; note that data1.length is used again below but data1 length is expanded via pushes.
+                    table1= document.createElement("table"),
+                    tablebit= document.createElement("table"),
+                    tablewatch = document.createElement("table"),
+                    //tablebit = document.createElement("table")
+                    rowbit = tablebit.insertRow(),
+                    row = table1.insertRow(),
+                    rowwatch = tablewatch.insertRow();
+                    var options = { month: 'short', day: 'numeric' };
+
+                for (var i = 0; i < (watch.length + stocks.length + 3); i++) {  // +3 to stocks.lenght to account for the added SPY and ^DJI and BTC-USD in the stock list
+                    var key1 = i.toString()
+
+                    symbol = json["quoteResponse"]["result"][key1]["symbol"];
+                    last = json["quoteResponse"]["result"][key1]["regularMarketPrice"].toFixed(2);
+                    close = json["quoteResponse"]["result"][key1]["regularMarketPreviousClose"].toFixed(2);
+                    open = json["quoteResponse"]["result"][key1]["regularMarketOpen"].toFixed(2);
+                    daylow = json["quoteResponse"]["result"][key1]["regularMarketDayLow"].toFixed(2);
+                    dayhigh = json["quoteResponse"]["result"][key1]["regularMarketDayHigh"].toFixed(2);
+                    high52 = json["quoteResponse"]["result"][key1]["fiftyTwoWeekHigh"].toFixed(2);
+                    low52 = json["quoteResponse"]["result"][key1]["fiftyTwoWeekLow"].toFixed(2);
+                    daypercent = json["quoteResponse"]["result"][key1]["regularMarketChangePercent"].toFixed(2);
+                    volume = (json["quoteResponse"]["result"][key1]["regularMarketVolume"]/1000000).toFixed(2)+"M";
+                    ma50= json["quoteResponse"]["result"][key1]["fiftyDayAverage"].toFixed(2);
+                    ma200= json["quoteResponse"]["result"][key1]["twoHundredDayAverage"].toFixed(2);
+                    earningDate = json["quoteResponse"]["result"][key1]["earningsTimestamp"];
+                    earningDate = new Date(earningDate*1000).toLocaleDateString('en-GB',options);
+                    //earningDate = (earningDate.getMonth() + 1) + "-" + earningDate.getDate();
+                    if (earningDate == "Invalid Date") {
+                        earningDate = "*"
+                    }
+
+                    // put + in front of numbers that are positive.
+                    chg2 = (last-close).toFixed(2);
+                    var chg = (chg2 > 0 ) ? "+" + chg2 : "" + chg2;
+
+                    gap2=(open-close).toFixed(2);
+                    var gap = (gap2 > 0 ) ? "+" + gap2 : "" + gap2;
+
+                    if (watch.includes(symbol)) {
+                            data3.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap,earningDate);
+
+                    } else if (symbol==="BTC-USD") {
+                        chg2 = json["quoteResponse"]["result"][key1]["regularMarketChangePercent"];
+                        chg2 = parseFloat(chg2);
+                        last = parseFloat(last);
+                        chg = (last * chg2/100).toFixed(2);
+                        gap = "n/a";
+                        data2.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap,earningDate);
+                        //console.log("chg2: "+chg2);
+                    } 
+                    else {
+                        data1.push(symbol, last, chg, dayhigh, daylow,volume,low52,high52,daypercent, ma50,ma200,gap,earningDate);
+                    }
+
+                }   
+                    // LOOP THROUGH ARRAYS AND ADD TABLE CELLS
+                        for (var j = 0; j < data2.length; j++) {
+                            var cell = rowbit.insertCell();
+                            cell.innerHTML = data2[j];
+                            // BREAK INTO NEXT ROW
+                            var next = j + 1;
+                            if (next % perrow == 0 && next != data2.length) {
+                                rowbit = tablebit.insertRow();
+                            }
+                        }
+
+                        for (var k = 0; k < data1.length; k++) {
+                            var cell = row.insertCell();
+                            cell.innerHTML = data1[k];
+                         // BREAK INTO NEXT ROW
+                            var next = k + 1;
+                            if (next % perrow == 0 && next != data1.length) {
+                               
+                                row = table1.insertRow();
+                            }
+                        }
+
+                        for (var l = 0; l < data3.length; l++) {
+                            //console.log("D3 length: "+ data3.length)
+                            var cell = rowwatch.insertCell();
+                            cell.innerHTML = data3[l];
+                         // BREAK INTO NEXT ROW
+                            var next = l + 1;
+                            if (next % perrow == 0 && next != data3.length) {
+
+                                rowwatch = tablewatch.insertRow();
+                            }
+                        }
+                
+                // (C) erase current table from data2 and databit  and append new table  
+                document.getElementById("data2").innerHTML = "";
+                document.getElementById("databit").innerHTML = "";
+                document.getElementById("datawatch").innerHTML = "";
+                document.getElementById("data2").appendChild(table1);
+                document.getElementById("databit").appendChild(tablebit);
+                document.getElementById("datawatch").appendChild(tablewatch);
+
+           }
+
+            
+
+            // found at http://jsfiddle.net/ardeezstyle/GSWBW/1/
+            function format_table_data(tNumber) {
+                var  tbody, rowCount, cellCount, value;
+                //var table2 = document.getElementsByTagName('table')[tNumber];
+                //var table2 = document.getElementsByTagName('table')[1];
+                var table2 = document.getElementById(tNumber);
+                rowCount = document.getElementById('data2').getElementsByTagName('tr').length
+
+                console.log("format-table-data: "+tNumber);
+                console.log("format-table-data - tablename: "+table2);
+                tbody = table2.childNodes[0];
+
+                if (tbody) rowCount = tbody.childNodes.length;
+ 
+                for (i = 1; i < rowCount; i++) {
+                    cellCount = tbody.childNodes[i].childNodes.length;
+
+  
+                    for (j = 1; j < cellCount; j++) {
+
+                        value = tbody.childNodes[i].childNodes[j].outerText;
+                          
+                        if (value.substring(0, 1) == "-") {
+                           
+                            tbody.childNodes[i].childNodes[j].style.color = "red";
+                            tbody.childNodes[i].childNodes[(0)].style.color = "red";
+
+                         } 
+                         if (tbody.childNodes[i].childNodes[(2)].outerText.substring(0,1) !== "-") {
+                            tbody.childNodes[i].childNodes[(0)].style.color = "limegreen"
+                         }
+                        
+                    }
+ 
+                }
+                for (i=0; i<rowCount; i++){
+                    xsymbol = tbody.childNodes[i].childNodes[(0)].outerText
+                    //itemNo=window.combined;
+                    indexI=window.combined.indexOf(xsymbol);
+                    //functionstring = 'research('+xsymbol+');'
+                    functionstring = 'research("'+indexI+'");'
+                                        
+                    tbody.childNodes[i].childNodes[(0)].setAttribute('onclick',functionstring);
+                                        
+                    tbody.childNodes[i].childNodes[(0)].style.cursor="default";
+
+                    
+                }
+            }; //end of formatable()
+
+            function trlistener() {
+                var tableRows2 = document.getElementsByTagName('tr');
+                console.log("Listener row A: "+ i);
+                for (var i = 0; i < tableRows2.length; i += 1) {
+                  tableRows2[i].addEventListener('mouseover', function() {
+                        this.style.backgroundColor = "orange";
+                        console.log("Listener row B: "+ i);
+                  
+                  }); 
+                  // or attachEvent, depends on browser
+                }
+
+            } // end of trlistener()
+
+            function mouseover(row) {
+
+
+            var TableBackgroundNormalColor = "#ffffff";
+            var TableBackgroundMouseoverColor = "#9999ff";
+            console.log("mouseon Row: "+ row);
+            row.style.backgroundColor = TableBackgroundMouseoverColor;
+            
+            } // end of mouseover()
+
+            function mouseout(row) {
+
+
+            var TableBackgroundNormalColor = "#ffffff";
+            var TableBackgroundMouseoverColor = "#9999ff";
+
+            row.style.backgroundColor = TableBackgroundNormalColor; 
+            } // end of mouseout() 
+
+
+
+    </script>
+</body>
+</html>
